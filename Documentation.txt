@@ -1,0 +1,12 @@
+### 1. Dataset Selection ###
+○ Dataset chosen:
+I chose the “Mental Health FAQ” dataset because it contains short, high-quality question-answer pairs related to mental health. This structure makes it ideal for evaluating a retrieval-based system, where user queries are matched to semantically similar questions and their corresponding answers.
+Additionally, The topic is one I explored in my final project, so I am familiar with it and feel a personal connection to it. 
+This makes it easier for me to understand the dataset and work effectively on a short, time-constrained project.
+
+○ Expected user queries:
+"What is anxiety?", "How to deal with depression?" etc.
+
+### 2. Vector Database Selection ###
+I chose MongoDB because I already have experience with it, and it supports vector search capabilities that are sufficient for a small-scale RAG prototype.
+Using a familiar database allowed me to focus on the retrieval logic rather than infrastructure complexity.
