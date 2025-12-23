@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RAG Retrieval Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      margin-top: 50px;
+      width: 600px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      background-color: #f9f9f9;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .score {
+      font-weight: bold;
+      color: #2a7ae2;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+
+    .text {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RAG Retrieval Demo</h1>
+    <input type="text" id="query" placeholder="Ask something..." />
+    <button onclick="sendQuery()">Search</button>
+    <ul id="results"></ul>
+  </div>
+
+  <script>
+    async function sendQuery() {
+      const query = document.getElementById("query").value;
+      if (!query.trim()) return alert("Please enter a question.");
+      
+      const res = await fetch("/query", {  // השתמשנו ב-relative path
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query})
+      });
+
+      if (!res.ok) return alert("Error: " + res.statusText);
+
+      const data = await res.json();
+      const resultsEl = document.getElementById("results");
+      resultsEl.innerHTML = "";
+
+      if (data.length === 0) {
+        resultsEl.innerHTML = "<li>No results found.</li>";
+        return;
+      }
+
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<div class="score">Score: ${item.score.toFixed(2)}</div>
+                        <div><strong>Question ID:</strong> ${item.question_id}</div>
+                        <div><strong>Chunk ID:</strong> ${item.chunk_id}</div>
+                        <div class="text">${item.text}</div>
+                        `;
+        resultsEl.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>

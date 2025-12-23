@@ -1,20 +1,7 @@
 import os
 import pandas as pd
-from pymongo import MongoClient
-from dotenv import load_dotenv
+from db_utils import collection 
 import openai
-
-# Load environment variables
-load_dotenv()
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-MONGO_URI = os.getenv("MONGODB_URI")
-DB_NAME = os.getenv("MONGODB_DB")
-
-# Connect to MongoDB
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
-collection = db.documents
 
 # Load dataset
 df = pd.read_csv("data/Mental_Health_FAQ.csv")
@@ -29,21 +16,37 @@ def create_embedding(text: str):
     )
     return response.data[0].embedding
 
+def chunk_text(text, chunk_size=300, overlap=50):
+    chunks = []
+    start = 0
+
+    while start < len(text):
+        end = start + chunk_size
+        chunk = text[start:end]
+        chunks.append(chunk)
+        start = end - overlap
+
+    return chunks
+
 def ingest_documents():
-    collection.delete_many({})  # Clean previous data (for development)
+    collection.delete_many({})
 
     for _, row in df.iterrows():
         combined_text = f"Question: {row['Questions']}\nAnswer: {row['Answers']}"
 
-        embedding = create_embedding(combined_text)
+        chunks = chunk_text(combined_text)
 
-        document = {
-            "question_id": int(row["Question_ID"]),
-            "text": combined_text,
-            "embedding": embedding
-        }
+        for idx, chunk in enumerate(chunks):
+            embedding = create_embedding(chunk)
 
-        collection.insert_one(document)
+            document = {
+                "question_id": int(row["Question_ID"]),
+                "chunk_id": idx,
+                "text": chunk,
+                "embedding": embedding
+            }
+
+            collection.insert_one(document)
 
     print("Ingestion completed successfully.")
 
