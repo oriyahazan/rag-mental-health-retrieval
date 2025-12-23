@@ -1,0 +1,6 @@
+flask
+pandas
+pymongo
+python-dotenv
+openai
+numpy
